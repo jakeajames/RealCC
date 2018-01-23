@@ -18,6 +18,9 @@
 
 @end
 
+static BOOL BTenabbled= NO;
+
+
 %hook CCUILabeledRoundButton
 -(void)buttonTapped:(id)arg1 {
 
@@ -31,17 +34,52 @@ SBWiFiManager *wiFiManager = (SBWiFiManager *)[%c(SBWiFiManager) sharedInstance]
         [wiFiManager setWiFiEnabled:NO];
     }
 }
-/*
-//automatically enables itself 2 seconds later
+
+
+
+
 if ([self.title isEqualToString:@"Bluetooth"]) {
 
-BluetoothManager *btoothManager = (BluetoothManager *)[%c(BluetoothManager) sharedInstance];
+
+	BluetoothManager *btoothManager = (BluetoothManager *)[%c(BluetoothManager) sharedInstance];
     BOOL enabled = [btoothManager enabled];
 
     if(enabled) {
         [btoothManager setEnabled:NO];
         [btoothManager setPowered:NO];
+
+        BTenabbled = !enabled ;
     }
-}*/
+
+    if(!enabled) {
+
+    	BTenabbled = !enabled ;
+    }
+
+
 }
+
+}
+%end
+
+
+%hook BluetoothManager
+
+- (BOOL)setEnabled:(BOOL)arg1 {
+
+	return %orig(BTenabbled);
+
+}
+
+- (BOOL)setPowered:(BOOL)arg1{
+
+	 
+
+	return %orig(BTenabbled);
+
+
+}
+
+
+
 %end
