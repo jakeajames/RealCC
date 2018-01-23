@@ -18,7 +18,7 @@
 
 @end
 
-static BOOL BTenabbled= NO;
+static BOOL BTenabbled;
 
 
 %hook CCUILabeledRoundButton
@@ -53,7 +53,9 @@ if ([self.title isEqualToString:@"Bluetooth"]) {
 
     if(!enabled) {
 
-    	BTenabbled = !enabled ;
+    	
+    	 
+    	BTenabbled = YES ;
     }
 
 
@@ -65,19 +67,49 @@ if ([self.title isEqualToString:@"Bluetooth"]) {
 
 %hook BluetoothManager
 
+ - (void)_updateBluetoothState {
+
+ 	HBLogDebug(@"_updateBluetoothState %d", [self bluetoothState]);
+
+
+ 	
+
+ 	%orig();
+
+ }
+
 - (BOOL)setEnabled:(BOOL)arg1 {
 
+	
+
+
 	return %orig(BTenabbled);
+
+	
 
 }
 
 - (BOOL)setPowered:(BOOL)arg1{
 
-	 
+	
+
 
 	return %orig(BTenabbled);
 
+ 
 
+
+ 
+
+
+}
+
+-(BOOL)enabled {
+
+	BTenabbled = !%orig;
+
+
+	return %orig;
 }
 
 
