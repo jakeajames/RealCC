@@ -35,13 +35,8 @@ SBWiFiManager *wiFiManager = (SBWiFiManager *)[%c(SBWiFiManager) sharedInstance]
     }
 }
 
-
-
-
 if ([self.title isEqualToString:@"Bluetooth"]) {
-
-
-	BluetoothManager *btoothManager = (BluetoothManager *)[%c(BluetoothManager) sharedInstance];
+    BluetoothManager *btoothManager = (BluetoothManager *)[%c(BluetoothManager) sharedInstance];
     BOOL enabled = [btoothManager enabled];
 
     if(enabled) {
@@ -51,67 +46,25 @@ if ([self.title isEqualToString:@"Bluetooth"]) {
         BTenabbled = !enabled ;
     }
 
-    if(!enabled) {
-
-    	
-    	 
-    	BTenabbled = YES ;
-    }
-
-
+    if(!enabled) BTenabbled = YES;
+  }
 }
 
-}
 %end
-
 
 %hook BluetoothManager
 
- - (void)_updateBluetoothState {
-
- 	HBLogDebug(@"_updateBluetoothState %d", [self bluetoothState]);
-
-
- 	
-
- 	%orig();
-
- }
 
 - (BOOL)setEnabled:(BOOL)arg1 {
-
-	
-
-
-	return %orig(BTenabbled);
-
-	
-
+   return %orig(BTenabbled);
 }
 
 - (BOOL)setPowered:(BOOL)arg1{
-
-	
-
-
-	return %orig(BTenabbled);
-
- 
-
-
- 
-
-
+    return %orig(BTenabbled);
 }
 
 -(BOOL)enabled {
-
-	BTenabbled = !%orig;
-
-
-	return %orig;
+    BTenabbled = !%orig;
+    return %orig;
 }
-
-
-
 %end
