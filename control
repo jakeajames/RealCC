@@ -1,7 +1,7 @@
 Package: com.yourcompany.realcc
-Name: RealCÃC
+Name: RealCC
 Depends: mobilesubstrate
-Version: 0.0.1
+Version: 0.0.3
 Architecture: iphoneos-arm
 Description: An awesome MobileSubstrate tweak!
 Maintainer: System Administrator
