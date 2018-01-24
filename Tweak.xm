@@ -26,8 +26,8 @@ static BOOL BTenabbled;
 
 %orig;
 
-if ([self.title isEqualToString:@"Wi-Fi"]) {
-SBWiFiManager *wiFiManager = (SBWiFiManager *)[%c(SBWiFiManager) sharedInstance];
+if (([self.title isEqualToString:@"Wi-Fi"]) || ([self.title isEqualToString:@"WLAN"])) {
+    SBWiFiManager *wiFiManager = (SBWiFiManager *)[%c(SBWiFiManager) sharedInstance];
     BOOL enabled = [wiFiManager wiFiEnabled];
 
     if(enabled) {
