@@ -18,8 +18,6 @@
 
 @end
 
-
-
 static BOOL BTenabbled;
 
 
