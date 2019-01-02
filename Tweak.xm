@@ -1,70 +1,66 @@
-@interface CCUILabeledRoundButton
-@property (nonatomic, copy, readwrite) NSString *title;
+@interface BluetoothManager : NSObject
 @end
 
-@interface SBWiFiManager
--(id)sharedInstance;
--(void)setWiFiEnabled:(BOOL)enabled;
--(bool)wiFiEnabled;
+@interface BluetoothManager (Addition)
+@property(assign) BOOL ignoreAirplaneModeCheck;
 @end
 
-@interface BluetoothManager
--(id)sharedInstance;
--(void)setEnabled:(BOOL)enabled;
--(bool)enabled;
-
--(void)setPowered:(BOOL)powered;
--(bool)powered;
-
-@end
-
-static BOOL BTenabbled;
-
-
-%hook CCUILabeledRoundButton
--(void)buttonTapped:(id)arg1 {
-
-%orig;
-
-if ([self.title isEqualToString:[[NSBundle bundleWithPath:@"/System/Library/ControlCenter/Bundles/ConnectivityModule.bundle"] localizedStringForKey:@"CONTROL_CENTER_STATUS_WIFI_NAME" value:@"CONTROL_CENTER_STATUS_WIFI_NAME" table:@"Localizable"]] || [self.title isEqualToString:[[NSBundle bundleWithPath:@"/System/Library/ControlCenter/Bundles/ConnectivityModule.bundle"] localizedStringForKey:@"CONTROL_CENTER_STATUS_WLAN_NAME" value:@"CONTROL_CENTER_STATUS_WLAN_NAME" table:@"Localizable"]]) {
-SBWiFiManager *wiFiManager = (SBWiFiManager *)[%c(SBWiFiManager) sharedInstance];
-    BOOL enabled = [wiFiManager wiFiEnabled];
-
-    if(enabled) {
-        [wiFiManager setWiFiEnabled:NO];
-    }
-}
-
-if ([self.title isEqualToString:[[NSBundle bundleWithPath:@"/System/Library/ControlCenter/Bundles/ConnectivityModule.bundle"] localizedStringForKey:@"CONTROL_CENTER_STATUS_BLUETOOTH_NAME" value:@"CONTROL_CENTER_STATUS_BLUETOOTH_NAME" table:@"Localizable"]]) {
-    BluetoothManager *btoothManager = (BluetoothManager *)[%c(BluetoothManager) sharedInstance];
-    BOOL enabled = [btoothManager enabled];
-
-    if(enabled) {
-        [btoothManager setEnabled:NO];
-        [btoothManager setPowered:NO];
-
-        BTenabbled = !enabled ;
-    }
-
-    if(!enabled) BTenabbled = YES;
-  }
-}
-
-%end
+// By default, when we turn bluetooth off: 3 -> 2
+// What we want: 3 -> 1 and power off bluetooth
+// By ensuring airplane mode turned on, we already satisfy the requirement above so...
 
 %hook BluetoothManager
 
+%property(assign) BOOL ignoreAirplaneModeCheck;
 
-- (BOOL)setEnabled:(BOOL)arg1 {
-   return %orig(BTenabbled);
+- (void)_updateAirplaneModeStatus {
+    if (self.ignoreAirplaneModeCheck)
+        return;
+    %orig;
 }
 
-- (BOOL)setPowered:(BOOL)arg1{
-    return %orig(BTenabbled);
+- (void)bluetoothStateActionWithCompletion:(void *)completion {
+    bool airplaneMode = MSHookIvar<bool>(self, "_airplaneMode");
+    MSHookIvar<bool>(self, "_airplaneMode") = YES;
+    self.ignoreAirplaneModeCheck = YES;
+    %orig;
+    MSHookIvar<bool>(self, "_airplaneMode") = airplaneMode;
+    self.ignoreAirplaneModeCheck = NO;
 }
 
--(BOOL)enabled {
-    BTenabbled = !%orig;
-    return %orig;
-}
 %end
+
+@interface WFWiFiStateMonitor : NSObject
+@end
+
+@interface WFControlCenterStateMonitor : WFWiFiStateMonitor
+@end
+
+@interface WFControlCenterStateMonitor (Addition)
+@property(assign) BOOL forceAirplaneMode;
+@end
+
+// For Wi-Fi though, WiFiKit.framework isn't available in x86_64 so it's a bit difficult to know what's going on as we toggle it.
+// However, using the same trick as we did for bluetooth seems to also work here.
+
+%hook WFControlCenterStateMonitor
+
+%property(assign) BOOL forceAirplaneMode;
+
+- (BOOL)_airplaneModeEnabled {
+    return self.forceAirplaneMode ? YES : %orig;
+}
+
+- (void)performAction:(void *)completion {
+    self.forceAirplaneMode = YES; // Do we always force airplane mode?
+    %orig;
+    self.forceAirplaneMode = NO;
+}
+
+%end
+
+%ctor {
+    dlopen("/System/Library/PrivateFrameworks/BluetoothManager.framework/BluetoothManager", RTLD_LAZY);
+    dlopen("/System/Library/PrivateFrameworks/WiFiKit.framework/WiFiKit", RTLD_LAZY);
+    %init;
+}
