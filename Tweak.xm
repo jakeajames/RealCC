@@ -7,7 +7,7 @@
 
 // By default, when we turn bluetooth off: 3 -> 2
 // What we want: 3 -> 1 and power off bluetooth
-// By ensuring airplane mode turned on, we already satisfy the requirement above so...
+// By ensuring that airplane mode is turned on, we already satisfy the requirement above so...
 
 %hook BluetoothManager
 
