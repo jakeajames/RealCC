@@ -1,9 +1,9 @@
-Package: com.ps.realcc
+Package: com.jakeashacks.realcc
 Name: RealCC
 Depends: mobilesubstrate, firmware (>= 11.0)
 Version: 0.0.5
 Architecture: iphoneos-arm
-Description: Real CC
-Maintainer: PoomSmart
-Author: PoomSmart
+Description: Actually disable WiFI and Bluetooth from CC in iOS 11.
+Maintainer: Jake James
+Author: Jake James
 Section: Tweaks
