@@ -1,5 +1,5 @@
 include $(THEOS)/makefiles/common.mk
-export ARCHS = arm64
+export ARCHS = arm64 arm64e
 TWEAK_NAME = RealCC
 RealCC_FILES = Tweak.xm
 RealCC_FRAMEWORKS = UIKit
